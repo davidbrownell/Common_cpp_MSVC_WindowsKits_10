@@ -58,7 +58,7 @@ def GetCustomActions(
     cases, this is Bash on Linux systems and Batch or PowerShell on Windows systems.
     """
 
-    if CurrentShell.CategoryName != "Windows":
+    if configuration == "Noop":
         return []
 
     actions = []

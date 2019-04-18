@@ -98,7 +98,6 @@ def GetCustomActions(
 
         actions += [
             CurrentShell.Commands.Set("DEVELOPMENT_ENVIRONMENT_WINDOWS_KIT_ROOT", windows_kit_dir),
-
             # This value was used for Common_cpp_MSVC_2017 and is here only for backwards compatibility.
             # New code should use the value above.
             CurrentShell.Commands.Set("_VS_BUILD_TOOLS_WINDOWS_KIT_DIR", windows_kit_dir),
@@ -115,10 +114,7 @@ def GetCustomActions(
         windows_kit_bin_dir = os.path.join(windows_kit_bin_dir, configuration)
         assert os.path.isdir(windows_kit_bin_dir), windows_kit_bin_dir
 
-        actions += [
-            CurrentShell.Commands.AugmentPath(windows_kit_bin_dir),
-            CurrentShell.Commands.AugmentPath(os.path.join(windows_kit_bin_dir, "ucrt")),
-        ]
+        actions += [CurrentShell.Commands.AugmentPath(windows_kit_bin_dir), CurrentShell.Commands.AugmentPath(os.path.join(windows_kit_bin_dir, "ucrt"))]
 
         # Includes
         windows_kit_include_dir = ActivationActivity.GetVersionedDirectory(

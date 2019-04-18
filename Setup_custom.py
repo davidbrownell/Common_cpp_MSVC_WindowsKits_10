@@ -107,14 +107,7 @@ def GetDependencies():
     else:
         d["Noop"] = Configuration(
             "This repository is only supported on Windows",
-            [
-                Dependency(
-                    "0EAA1DCF22804F90AD9F5A3B85A5D706",
-                    "Common_Environment",
-                    "python36",
-                    "https://github.com/davidbrownell/Common_Environment_v3.git",
-                ),
-            ],
+            [Dependency("0EAA1DCF22804F90AD9F5A3B85A5D706", "Common_Environment", "python36", "https://github.com/davidbrownell/Common_Environment_v3.git")],
         )
 
     return d

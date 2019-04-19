@@ -98,9 +98,15 @@ def GetDependencies():
 
     d = OrderedDict()
 
-    for architecture in ["x64", "x86"]:
-        d[architecture] = Configuration(
-            architecture,
+    if CurrentShell.CategoryName == "Windows":
+        for architecture in ["x64", "x86"]:
+            d[architecture] = Configuration(
+                architecture,
+                [Dependency("0EAA1DCF22804F90AD9F5A3B85A5D706", "Common_Environment", "python36", "https://github.com/davidbrownell/Common_Environment_v3.git")],
+            )
+    else:
+        d["Noop"] = Configuration(
+            "This repository is only supported on Windows",
             [Dependency("0EAA1DCF22804F90AD9F5A3B85A5D706", "Common_Environment", "python36", "https://github.com/davidbrownell/Common_Environment_v3.git")],
         )
 
@@ -128,7 +134,7 @@ def GetCustomActions(debug, verbose, explicit_configurations):
         assert os.path.isdir(this_dir), this_dir
 
         install_filename = os.path.join(this_dir, "Install.7z")
-        
+
         # Reconstruct the binary
         if not os.path.isfile(install_filename):
             actions += [

@@ -97,10 +97,10 @@ def GetCustomActions(
         assert os.path.isdir(windows_kit_dir), windows_kit_dir
 
         actions += [
-            CurrentShell.Commands.Set("DEVELOPMENT_ENVIRONMENT_WINDOWS_KIT_ROOT", windows_kit_dir),
-            # This value was used for Common_cpp_MSVC_2017 and is here only for backwards compatibility.
-            # New code should use the value above.
-            CurrentShell.Commands.Set("_VS_BUILD_TOOLS_WINDOWS_KIT_DIR", windows_kit_dir),
+            # These values are typically set when activating a Visual Studio environment.
+            CurrentShell.Commands.Set("WindowsSkdDir", windows_kit_dir),
+            CurrentShell.Commands.Set("UniversalCRTSdkDir", windows_kit_dir),
+            CurrentShell.Commands.Set("ExtensionSdkDir", os.path.join(windows_kit_dir, "Extension SDKs")),
         ]
 
         # Binaries

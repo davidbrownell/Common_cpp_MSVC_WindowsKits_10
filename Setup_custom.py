@@ -154,7 +154,7 @@ def GetCustomActions(debug, verbose, explicit_configurations):
         # Install the file
         actions += [
             CurrentShell.Commands.Execute(
-                'python "{script}" Install "{name}" "{uri}" "{dir}" "{version}"'.format(
+                'python "{script}" Install "{name}" "{uri}" "{dir}" "/unique_id={version}" /unique_id_is_hash'.format(
                     script=os.path.join(
                         os.getenv("DEVELOPMENT_ENVIRONMENT_FUNDAMENTAL"),
                         "RepositoryBootstrap",

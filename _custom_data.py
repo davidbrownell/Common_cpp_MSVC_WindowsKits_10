@@ -25,5 +25,5 @@ _script_dir, _script_name                   = os.path.split(_script_fullpath)
 #  ----------------------------------------------------------------------
 
 _CUSTOM_DATA                                = [
-    ("Windows Kits - 10.0.17763.0", "4148B22C5C910A97630327DD4DF54CD29EDBFDE190C44E559816FE5A963670D4", ["Libraries", "Windows Kits", "10"]),
+    ("Windows Kits - 10.0.17763.0", "f8f19a7b35fe7d1c9d651512c9da3fbad9052713ab0f1fcad1252dca9c82dade", ["Libraries", "Windows Kits", "10"]),
 ]

@@ -89,7 +89,6 @@ def GetCustomActions(
                         version=version,
                     ),
                 ),
-                CurrentShell.Commands.Message(""),
             ]
 
         # Add the Windows Kit

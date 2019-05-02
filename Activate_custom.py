@@ -58,9 +58,6 @@ def GetCustomActions(
     cases, this is Bash on Linux systems and Batch or PowerShell on Windows systems.
     """
 
-    if configuration == "Noop":
-        return []
-
     actions = []
 
     if fast:
@@ -70,88 +67,90 @@ def GetCustomActions(
             ),
         )
     else:
-        # Verify install binaries
-        for name, version, path_parts in _CUSTOM_DATA:
-            this_dir = os.path.join(*([_script_dir] + path_parts))
-            assert os.path.isdir(this_dir), this_dir
+        if CurrentShell.CategoryName == "Windows":
+            # Verify install binaries
+            for name, version, path_parts in _CUSTOM_DATA:
+                this_dir = os.path.join(*([_script_dir] + path_parts))
+                assert os.path.isdir(this_dir), this_dir
+
+                actions += [
+                    CurrentShell.Commands.Execute(
+                        'python "{script}" Verify "{name}" "{dir}" "{version}"'.format(
+                            script=os.path.join(
+                                os.getenv("DEVELOPMENT_ENVIRONMENT_FUNDAMENTAL"),
+                                "RepositoryBootstrap",
+                                "SetupAndActivate",
+                                "AcquireBinaries.py",
+                            ),
+                            name=name,
+                            dir=this_dir,
+                            version=version,
+                        ),
+                    ),
+                ]
+
+        if configuration != "Noop":
+            library_version_info = version_specs.Libraries.get("Windows Kits", {})
+
+            # Add the Windows Kit
+            windows_kit_dir = os.path.join(_script_dir, "Libraries", "Windows Kits", "10")
+            assert os.path.isdir(windows_kit_dir), windows_kit_dir
 
             actions += [
-                CurrentShell.Commands.Execute(
-                    'python "{script}" Verify "{name}" "{dir}" "{version}"'.format(
-                        script=os.path.join(
-                            os.getenv("DEVELOPMENT_ENVIRONMENT_FUNDAMENTAL"),
-                            "RepositoryBootstrap",
-                            "SetupAndActivate",
-                            "AcquireBinaries.py",
-                        ),
-                        name=name,
-                        dir=this_dir,
-                        version=version,
-                    ),
-                ),
+                # These values are typically set when activating a Visual Studio environment.
+                CurrentShell.Commands.Set("WindowsSkdDir", windows_kit_dir),
+                CurrentShell.Commands.Set("UniversalCRTSdkDir", windows_kit_dir),
+                CurrentShell.Commands.Set("ExtensionSdkDir", os.path.join(windows_kit_dir, "Extension SDKs")),
             ]
 
-        library_version_info = version_specs.Libraries.get("Windows Kits", {})
+            # Binaries
+            windows_kit_bin_dir = ActivationActivity.GetVersionedDirectory(
+                library_version_info,
+                windows_kit_dir,
+                "bin",
+            )
+            assert os.path.isdir(windows_kit_bin_dir), windows_kit_bin_dir
 
-        # Add the Windows Kit
-        windows_kit_dir = os.path.join(_script_dir, "Libraries", "Windows Kits", "10")
-        assert os.path.isdir(windows_kit_dir), windows_kit_dir
+            windows_kit_bin_dir = os.path.join(windows_kit_bin_dir, configuration)
+            assert os.path.isdir(windows_kit_bin_dir), windows_kit_bin_dir
 
-        actions += [
-            # These values are typically set when activating a Visual Studio environment.
-            CurrentShell.Commands.Set("WindowsSkdDir", windows_kit_dir),
-            CurrentShell.Commands.Set("UniversalCRTSdkDir", windows_kit_dir),
-            CurrentShell.Commands.Set("ExtensionSdkDir", os.path.join(windows_kit_dir, "Extension SDKs")),
-        ]
+            actions += [CurrentShell.Commands.AugmentPath(windows_kit_bin_dir), CurrentShell.Commands.AugmentPath(os.path.join(windows_kit_bin_dir, "ucrt"))]
 
-        # Binaries
-        windows_kit_bin_dir = ActivationActivity.GetVersionedDirectory(
-            library_version_info,
-            windows_kit_dir,
-            "bin",
-        )
-        assert os.path.isdir(windows_kit_bin_dir), windows_kit_bin_dir
+            # Includes
+            windows_kit_include_dir = ActivationActivity.GetVersionedDirectory(
+                library_version_info,
+                windows_kit_dir,
+                "Include",
+            )
+            assert os.path.isdir(windows_kit_include_dir), windows_kit_include_dir
 
-        windows_kit_bin_dir = os.path.join(windows_kit_bin_dir, configuration)
-        assert os.path.isdir(windows_kit_bin_dir), windows_kit_bin_dir
+            new_includes = []
 
-        actions += [CurrentShell.Commands.AugmentPath(windows_kit_bin_dir), CurrentShell.Commands.AugmentPath(os.path.join(windows_kit_bin_dir, "ucrt"))]
+            for include_name in ["shared", "ucrt", "um"]:
+                this_include_dir = os.path.join(windows_kit_include_dir, include_name)
+                if os.path.isdir(this_include_dir):
+                    new_includes.append(this_include_dir)
 
-        # Includes
-        windows_kit_include_dir = ActivationActivity.GetVersionedDirectory(
-            library_version_info,
-            windows_kit_dir,
-            "Include",
-        )
-        assert os.path.isdir(windows_kit_include_dir), windows_kit_include_dir
+            if new_includes:
+                actions.append(CurrentShell.Commands.Augment("INCLUDE", new_includes))
 
-        new_includes = []
+            # Libs
+            windows_kit_lib_dir = ActivationActivity.GetVersionedDirectory(
+                library_version_info,
+                windows_kit_dir,
+                "Lib",
+            )
+            assert os.path.isdir(windows_kit_lib_dir), windows_kit_lib_dir
 
-        for include_name in ["shared", "ucrt", "um"]:
-            this_include_dir = os.path.join(windows_kit_include_dir, include_name)
-            if os.path.isdir(this_include_dir):
-                new_includes.append(this_include_dir)
+            new_libs = []
 
-        if new_includes:
-            actions.append(CurrentShell.Commands.Augment("INCLUDE", new_includes))
+            for lib_name in ["ucrt", "ucrt_enclave", "um"]:
+                this_lib_dir = os.path.join(windows_kit_lib_dir, lib_name, configuration)
+                if os.path.isdir(this_lib_dir):
+                    new_libs.append(this_lib_dir)
 
-        # Libs
-        windows_kit_lib_dir = ActivationActivity.GetVersionedDirectory(
-            library_version_info,
-            windows_kit_dir,
-            "Lib",
-        )
-        assert os.path.isdir(windows_kit_lib_dir), windows_kit_lib_dir
-
-        new_libs = []
-
-        for lib_name in ["ucrt", "ucrt_enclave", "um"]:
-            this_lib_dir = os.path.join(windows_kit_lib_dir, lib_name, configuration)
-            if os.path.isdir(this_lib_dir):
-                new_libs.append(this_lib_dir)
-
-        if new_libs:
-            actions.append(CurrentShell.Commands.Augment("LIB", new_libs))
+            if new_libs:
+                actions.append(CurrentShell.Commands.Augment("LIB", new_libs))
 
     return actions
 

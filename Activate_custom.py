@@ -89,8 +89,9 @@ def GetCustomActions(
                         version=version,
                     ),
                 ),
-                CurrentShell.Commands.Message(""),
             ]
+
+        library_version_info = version_specs.Libraries.get("Windows Kits", {})
 
         # Add the Windows Kit
         windows_kit_dir = os.path.join(_script_dir, "Libraries", "Windows Kits", "10")
@@ -105,7 +106,7 @@ def GetCustomActions(
 
         # Binaries
         windows_kit_bin_dir = ActivationActivity.GetVersionedDirectory(
-            version_specs.Libraries,
+            library_version_info,
             windows_kit_dir,
             "bin",
         )
@@ -118,7 +119,7 @@ def GetCustomActions(
 
         # Includes
         windows_kit_include_dir = ActivationActivity.GetVersionedDirectory(
-            version_specs.Libraries,
+            library_version_info,
             windows_kit_dir,
             "Include",
         )
@@ -136,7 +137,7 @@ def GetCustomActions(
 
         # Libs
         windows_kit_lib_dir = ActivationActivity.GetVersionedDirectory(
-            version_specs.Libraries,
+            library_version_info,
             windows_kit_dir,
             "Lib",
         )

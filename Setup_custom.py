@@ -104,8 +104,8 @@ def GetDependencies():
                 architecture,
                 [Dependency("0EAA1DCF22804F90AD9F5A3B85A5D706", "Common_Environment", "python36", "https://github.com/davidbrownell/Common_Environment_v3.git")],
             )
-    
-    d["Noop"] = Configuration(
+
+    d["noop"] = Configuration(
         "Configuration that doesn't do anything; this is useful on non-Windows machines or in Bootstrap repositories (where different versions of MSVC conflict with each other (normally, MSVC repositories are mutually exclusive))",
         [Dependency("0EAA1DCF22804F90AD9F5A3B85A5D706", "Common_Environment", "python36", "https://github.com/davidbrownell/Common_Environment_v3.git")],
     )
@@ -118,7 +118,7 @@ def GetCustomActions(debug, verbose, explicit_configurations):
     """
     Returns an action or list of actions that should be invoked as part of the setup process.
 
-    Actions are generic command line statements defined in 
+    Actions are generic command line statements defined in
     <Common_Environment>/Libraries/Python/CommonEnvironment/v1.0/CommonEnvironment/Shell/Commands/__init__.py
     that are converted into statements appropriate for the current scripting language (in most
     cases, this is Bash on Linux systems and Batch or PowerShell on Windows systems.

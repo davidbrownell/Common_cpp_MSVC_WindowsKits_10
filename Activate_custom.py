@@ -63,7 +63,9 @@ def GetCustomActions(
     if fast:
         actions.append(
             CurrentShell.Commands.Message(
-                "** FAST: Activating without verifying content. ({})".format(_script_fullpath),
+                "** FAST: Activating without verifying content. ({})".format(
+                    _script_fullpath,
+                ),
             ),
         )
     else:
@@ -100,7 +102,10 @@ def GetCustomActions(
                 # These values are typically set when activating a Visual Studio environment.
                 CurrentShell.Commands.Set("WindowsSkdDir", windows_kit_dir),
                 CurrentShell.Commands.Set("UniversalCRTSdkDir", windows_kit_dir),
-                CurrentShell.Commands.Set("ExtensionSdkDir", os.path.join(windows_kit_dir, "Extension SDKs")),
+                CurrentShell.Commands.Set(
+                    "ExtensionSdkDir",
+                    os.path.join(windows_kit_dir, "Extension SDKs"),
+                ),
             ]
 
             # Binaries
@@ -114,7 +119,12 @@ def GetCustomActions(
             windows_kit_bin_dir = os.path.join(windows_kit_bin_dir, configuration)
             assert os.path.isdir(windows_kit_bin_dir), windows_kit_bin_dir
 
-            actions += [CurrentShell.Commands.AugmentPath(windows_kit_bin_dir), CurrentShell.Commands.AugmentPath(os.path.join(windows_kit_bin_dir, "ucrt"))]
+            actions += [
+                CurrentShell.Commands.AugmentPath(windows_kit_bin_dir),
+                CurrentShell.Commands.AugmentPath(
+                    os.path.join(windows_kit_bin_dir, "ucrt"),
+                ),
+            ]
 
             # Includes
             windows_kit_include_dir = ActivationActivity.GetVersionedDirectory(
@@ -144,7 +154,7 @@ def GetCustomActions(
 
             new_libs = []
 
-            for lib_name in ["ucrt", "ucrt_enclave", "um"]:
+            for lib_name in ["ucrt", "um"]:
                 this_lib_dir = os.path.join(windows_kit_lib_dir, lib_name, configuration)
                 if os.path.isdir(this_lib_dir):
                     new_libs.append(this_lib_dir)

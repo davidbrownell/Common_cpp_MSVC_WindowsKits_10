@@ -16,6 +16,7 @@
 
 import os
 import sys
+import textwrap
 
 sys.path.insert(0, os.getenv("DEVELOPMENT_ENVIRONMENT_FUNDAMENTAL"))
 from RepositoryBootstrap.SetupAndActivate import CommonEnvironment, CurrentShell
@@ -161,6 +162,50 @@ def GetCustomActions(
 
             if new_libs:
                 actions.append(CurrentShell.Commands.Augment("LIB", new_libs))
+
+            # Additional setup
+            if not os.path.isfile(os.path.join(_script_dir, "admin_setup.complete")):
+                actions.append(
+                    CurrentShell.Commands.Message(
+                        "\n".join(
+                            [
+                                "        {}".format(line) for line in textwrap.dedent(
+                                    """\
+
+                                    # ----------------------------------------------------------------------
+                                    # ----------------------------------------------------------------------
+
+                                    WARNING ({}):
+
+                                    This repository includes setup activities that must be run as an administrator.
+                                    This additional setup is not required for all development activities, but is required
+                                    for the following:
+
+                                        - For external tools that use the registry to detect Windows Kits instances
+
+                                    This warning is otherwise safe to ignore.
+
+                                    To complete these optional setup activities:
+
+                                        1) Launch a command prompt with administrator rights:
+                                            - Windows Key
+                                            - Type "cmd"
+                                            - Right click and select "Run as Administrator"
+
+                                        2) Run "{}"
+
+                                    # ----------------------------------------------------------------------
+                                    # ----------------------------------------------------------------------
+
+                                    """,
+                                ).format(
+                                    _script_dir,
+                                    os.path.join(_script_dir, "admin_setup.cmd"),
+                                ).split("\n")
+                            ],
+                        ),
+                    ),
+                )
 
     return actions
 

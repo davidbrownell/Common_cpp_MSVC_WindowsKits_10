@@ -19,3 +19,6 @@ coverage.xml
 .vscode/*
 
 Libraries/Windows Kits/10/*
+
+admin_setup.reg
+admin_setup.complete

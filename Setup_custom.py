@@ -24,6 +24,7 @@
 
 import os
 import sys
+import textwrap
 
 from collections import OrderedDict
 
@@ -102,12 +103,26 @@ def GetDependencies():
         for architecture in ["x64", "x86"]:
             d[architecture] = Configuration(
                 architecture,
-                [Dependency("0EAA1DCF22804F90AD9F5A3B85A5D706", "Common_Environment", "python36", "https://github.com/davidbrownell/Common_Environment_v3.git")],
+                [
+                    Dependency(
+                        "0EAA1DCF22804F90AD9F5A3B85A5D706",
+                        "Common_Environment",
+                        "python36",
+                        "https://github.com/davidbrownell/Common_Environment_v3.git",
+                    )
+                ],
             )
 
     d["noop"] = Configuration(
         "Configuration that doesn't do anything; this is useful on non-Windows machines or in Bootstrap repositories (where different versions of MSVC conflict with each other (normally, MSVC repositories are mutually exclusive))",
-        [Dependency("0EAA1DCF22804F90AD9F5A3B85A5D706", "Common_Environment", "python36", "https://github.com/davidbrownell/Common_Environment_v3.git")],
+        [
+            Dependency(
+                "0EAA1DCF22804F90AD9F5A3B85A5D706",
+                "Common_Environment",
+                "python36",
+                "https://github.com/davidbrownell/Common_Environment_v3.git",
+            )
+        ],
     )
 
     return d
@@ -137,19 +152,17 @@ def GetCustomActions(debug, verbose, explicit_configurations):
 
         # Reconstruct the binary
         if not os.path.isfile(install_filename):
-            actions += [
-                CurrentShell.Commands.Execute(
-                    'python "{script}" Reconstruct "{filename}"'.format(
-                        script=os.path.join(
-                            os.getenv("DEVELOPMENT_ENVIRONMENT_FUNDAMENTAL"),
-                            "RepositoryBootstrap",
-                            "SetupAndActivate",
-                            "LargeFileSupport.py",
-                        ),
-                        filename=os.path.join(this_dir, "_Install.7z.001"),
+            actions += [CurrentShell.Commands.Execute(
+                'python "{script}" Reconstruct "{filename}"'.format(
+                    script=os.path.join(
+                        os.getenv("DEVELOPMENT_ENVIRONMENT_FUNDAMENTAL"),
+                        "RepositoryBootstrap",
+                        "SetupAndActivate",
+                        "LargeFileSupport.py",
                     ),
-                )
-            ]
+                    filename=os.path.join(this_dir, "_Install.7z.001"),
+                ),
+            )]
 
         # Install the file
         actions += [
@@ -162,10 +175,9 @@ def GetCustomActions(debug, verbose, explicit_configurations):
                         "AcquireBinaries.py",
                     ),
                     name=name,
-                    uri=CommonEnvironmentImports.FileSystem.FilenameToUri(install_filename).replace(
-                        "%",
-                        "%%",
-                    ),
+                    uri=CommonEnvironmentImports.FileSystem.FilenameToUri(
+                        install_filename,
+                    ).replace("%", "%%"),
                     dir=this_dir,
                     version=version,
                 ),
@@ -177,5 +189,25 @@ def GetCustomActions(debug, verbose, explicit_configurations):
                 variable_name="_setup_error",
             ),
         ]
+
+    # Write the admin setup registry file
+    with open(os.path.join(_script_dir, "admin_setup.reg"), "w") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                Windows Registry Editor Version 5.00
+
+                [HKEY_LOCAL_MACHINE\\SOFTWARE\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0]
+                "InstallationFolder"="{}"
+                "ProductName"="Microsoft Windows SDK for Windows 10.0.17763"
+                "ProductVersion"="10.0.17763"
+                """,
+            ).format(
+                os.path.join(_script_dir, "Libraries", "Windows Kits", "10").replace(
+                    "\\",
+                    "\\\\",
+                ),
+            ),
+        )
 
     return actions

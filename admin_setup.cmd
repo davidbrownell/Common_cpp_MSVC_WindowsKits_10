@@ -16,6 +16,12 @@ REM |
 REM ----------------------------------------------------------------------
 REM Setup activites that require admin access
 
+if not exist "%~dp0\admin_setup.reg" (
+    echo ERROR: Please run Setup.cmd before executing this script.
+    exit /B -1
+)
+
+echo Adding registry settings; please select "Yes" when prompted...
 regedit "%~dp0\admin_setup.reg"
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Unable to update the registry

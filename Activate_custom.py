@@ -168,34 +168,35 @@ def GetCustomActions(
             # Additional setup
 
             # ----------------------------------------------------------------------
-            def ShouldPromptForAdditionalSetup():
+            def IsAdditionalSetupComplete():
                 if os.path.isfile(os.path.join(_script_dir, "admin_setup.complete")):
-                    return False
+                    return True
 
                 # Don't prompt if the key already exists
                 import winreg
 
-                key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"Software\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0")
-                if key is None:
-                    return True
+                try:
+                    key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"Software\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0")
+                    if key is None:
+                        return False
 
-                with CallOnExit(lambda: winreg.CloseKey(key)):
-                    try:
+                    with CallOnExit(lambda: winreg.CloseKey(key)):
                         for value_name in [
                             "InstallationFolder",
                             "ProductName",
                             "ProductVersion",
                         ]:
+                            # The following line will raise an exception if the value does not exist
                             value = winreg.QueryValueEx(key, value_name)
 
-                    except FileNotFoundError:
-                        return True
+                    return True
 
+                except FileNotFoundError:
                     return False
 
             # ----------------------------------------------------------------------
 
-            if ShouldPromptForAdditionalSetup():
+            if not IsAdditionalSetupComplete():
                 actions.append(
                     CurrentShell.Commands.Message(
                         "\n".join(

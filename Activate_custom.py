@@ -18,6 +18,8 @@ import os
 import sys
 import textwrap
 
+from CommonEnvironment.CallOnExit import CallOnExit
+
 sys.path.insert(0, os.getenv("DEVELOPMENT_ENVIRONMENT_FUNDAMENTAL"))
 from RepositoryBootstrap.SetupAndActivate import CommonEnvironment, CurrentShell
 from RepositoryBootstrap.Impl.ActivationActivity import ActivationActivity
@@ -164,7 +166,37 @@ def GetCustomActions(
                 actions.append(CurrentShell.Commands.Augment("LIB", new_libs))
 
             # Additional setup
-            if not os.path.isfile(os.path.join(_script_dir, "admin_setup.complete")):
+
+            # ----------------------------------------------------------------------
+            def IsAdditionalSetupComplete():
+                if os.path.isfile(os.path.join(_script_dir, "admin_setup.complete")):
+                    return True
+
+                # Don't prompt if the key already exists
+                import winreg
+
+                try:
+                    key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"Software\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0")
+                    if key is None:
+                        return False
+
+                    with CallOnExit(lambda: winreg.CloseKey(key)):
+                        for value_name in [
+                            "InstallationFolder",
+                            "ProductName",
+                            "ProductVersion",
+                        ]:
+                            # The following line will raise an exception if the value does not exist
+                            value = winreg.QueryValueEx(key, value_name)
+
+                    return True
+
+                except FileNotFoundError:
+                    return False
+
+            # ----------------------------------------------------------------------
+
+            if not IsAdditionalSetupComplete():
                 actions.append(
                     CurrentShell.Commands.Message(
                         "\n".join(

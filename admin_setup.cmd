@@ -8,7 +8,7 @@ REM |      2019-04-16 21:54:19
 REM |
 REM ----------------------------------------------------------------------
 REM |
-REM |  Copyright David Brownell 2019-20
+REM |  Copyright David Brownell 2019-21
 REM |  Distributed under the Boost Software License, Version 1.0. See
 REM |  accompanying file LICENSE_1_0.txt or copy at
 REM |  http://www.boost.org/LICENSE_1_0.txt.
